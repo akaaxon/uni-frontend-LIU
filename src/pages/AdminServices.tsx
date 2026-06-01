@@ -1,16 +1,26 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, AlertCircle, RefreshCw, FileText, X } from "lucide-react";
+import { Plus, Trash2, Loader2, AlertCircle, RefreshCw, FileText, X, Clock } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL =  "http://localhost:3000";
 
 type Service = {
   id: string;
   name: string;
   description: string;
   required_documents: string[];
+  available_times: string[];
   created_at: string;
+};
+
+const formatTime12Hour = (time24: string) => {
+  if (!time24) return "";
+  const [h, m] = time24.split(":");
+  let hours = parseInt(h, 10);
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours.toString().padStart(2, "0")}:${m} ${ampm}`;
 };
 
 export default function AdminServices() {
@@ -20,10 +30,11 @@ export default function AdminServices() {
   const [isLoading, setIsLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
   
-  // Form State
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [requiredDocs, setRequiredDocs] = useState<string[]>([""]); 
+  const [availableTimes, setAvailableTimes] = useState<string[]>([""]); 
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchServices = async () => {
@@ -57,34 +68,55 @@ export default function AdminServices() {
     fetchServices();
   }, []);
 
-  // --- Dynamic Document Handlers ---
   const handleDocChange = (index: number, value: string) => {
     const newDocs = [...requiredDocs];
     newDocs[index] = value;
     setRequiredDocs(newDocs);
   };
-
-  const addDocField = () => {
-    setRequiredDocs([...requiredDocs, ""]);
-  };
-
+  const addDocField = () => setRequiredDocs([...requiredDocs, ""]);
   const removeDocField = (index: number) => {
     const newDocs = requiredDocs.filter((_, i) => i !== index);
     setRequiredDocs(newDocs.length === 0 ? [""] : newDocs);
   };
-  // ---------------------------------
+
+  const handleTimeChange = (index: number, value: string) => {
+    // Check for real-time duplication
+    if (availableTimes.includes(value) && value !== "") {
+        toast.warning("This time slot is already added.");
+        return;
+    }
+    
+    const newTimes = [...availableTimes];
+    newTimes[index] = value;
+    setAvailableTimes(newTimes);
+  };
+  const addTimeField = () => setAvailableTimes([...availableTimes, ""]);
+  const removeTimeField = (index: number) => {
+    const newTimes = availableTimes.filter((_, i) => i !== index);
+    setAvailableTimes(newTimes.length === 0 ? [""] : newTimes);
+  };
 
   const handleCreateService = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return toast.error("Application name is required.");
 
-    // FRONTEND GUARD: Clean the inputs and prevent empty submissions
     const cleanedDocs = requiredDocs
       .map(doc => doc.trim())
       .filter(doc => doc !== "");
 
     if (cleanedDocs.length === 0) {
       return toast.error("You must specify at least one required document.");
+    }
+
+    // Final safety check for times before submission
+    const formattedTimes = availableTimes
+      .filter(time => time.trim() !== "")
+      .map(time => formatTime12Hour(time));
+      
+    const uniqueTimes = Array.from(new Set(formattedTimes));
+
+    if (uniqueTimes.length === 0) {
+      return toast.error("You must specify at least one available time slot.");
     }
 
     setIsSubmitting(true);
@@ -96,7 +128,8 @@ export default function AdminServices() {
         body: JSON.stringify({ 
           name, 
           description,
-          required_documents: cleanedDocs
+          required_documents: cleanedDocs,
+          available_times: uniqueTimes 
         }),
       });
 
@@ -107,10 +140,10 @@ export default function AdminServices() {
 
       toast.success("Application created successfully!");
       
-      // Reset form on success
       setName("");
       setDescription("");
       setRequiredDocs([""]);
+      setAvailableTimes([""]); 
       fetchServices(); 
       
     } catch (error: any) {
@@ -154,19 +187,18 @@ export default function AdminServices() {
           </div>
         ) : (
           <>
-            {/* Top Section: Creation Form */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="p-6 border-b border-slate-100 bg-slate-50">
                 <h2 className="text-lg font-bold text-slate-900 flex items-center">
                   <Plus className="h-5 w-5 mr-2 text-orange-600" />
                   Create New Application
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">Define the application details and specify which documents the student must upload.</p>
+                <p className="text-sm text-slate-500 mt-1">Define the application details, required documents, and available time slots.</p>
               </div>
               
               <form onSubmit={handleCreateService} className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Left Column: Basic Info */}
+                  
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">Application Name</label>
@@ -180,9 +212,9 @@ export default function AdminServices() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Description (Optional)</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
                       <textarea
-                        rows={4}
+                        rows={3}
                         disabled={isSubmitting || isLoading}
                         className="block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border outline-none focus:ring-orange-600 focus:border-orange-600"
                         placeholder="Brief details about this application..."
@@ -190,9 +222,45 @@ export default function AdminServices() {
                         onChange={(e) => setDescription(e.target.value)}
                       />
                     </div>
+                    
+                    <div className="pt-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Available Time Slots</label>
+                      <div className="space-y-3">
+                        {availableTimes.map((time, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <div className="relative flex-1">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Clock className="h-4 w-4 text-slate-400" />
+                              </div>
+                              <input
+                                type="time"
+                                required
+                                disabled={isSubmitting || isLoading}
+                                value={time}
+                                onChange={(e) => handleTimeChange(index, e.target.value)}
+                                className="block w-full pl-10 sm:text-sm border-slate-300 rounded-md py-2 border outline-none focus:ring-orange-600 focus:border-orange-600 cursor-pointer"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeTimeField(index)}
+                              className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                            >
+                              <X className="h-5 w-5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addTimeField}
+                        className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center mt-3"
+                      >
+                        <Plus className="h-4 w-4 mr-1" /> Add another time slot
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Right Column: Required Documents */}
                   <div className="space-y-4">
                     <label className="block text-sm font-medium text-slate-700 mb-1">Required Documents</label>
                     <div className="space-y-3">
@@ -234,7 +302,7 @@ export default function AdminServices() {
                 <div className="mt-8 flex justify-end pt-4 border-t border-slate-100">
                   <button
                     type="submit"
-                    disabled={isSubmitting || isLoading || !name.trim() || requiredDocs.every(doc => doc.trim() === "") || !description || !description.trim() }
+                    disabled={isSubmitting || isLoading || !name.trim() || requiredDocs.every(doc => doc.trim() === "") || availableTimes.every(time => time.trim() === "")}
                     className="flex justify-center items-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? <><Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" /> Saving...</> : "Create Application"}
@@ -243,7 +311,6 @@ export default function AdminServices() {
               </form>
             </div>
 
-            {/* Bottom Section: Cards Grid */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold text-slate-900">Active Applications</h3>
@@ -279,8 +346,21 @@ export default function AdminServices() {
                         {service.description || <span className="italic">No description provided.</span>}
                       </p>
 
-                      {/* Display the required documents as tags */}
                       <div className="pt-4 border-t border-slate-100">
+                        <p className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Allowed Slots</p>
+                         {service.available_times && service.available_times.length > 0 ? (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {service.available_times.map((time, i) => (
+                              <span key={i} className="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
+                                <Clock className="h-3 w-3 mr-1 text-slate-500" />
+                                {time}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-slate-400 italic mb-4">No times set</p>
+                        )}
+
                         <p className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-3">Required Documents</p>
                         {service.required_documents && service.required_documents.length > 0 ? (
                           <div className="flex flex-wrap gap-2">

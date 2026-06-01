@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X, Check, Ban, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL =  "http://localhost:3000";
 
 export type Booking = {
   id: string;
@@ -42,7 +42,7 @@ export default function BookingModal({ isOpen, onClose, booking, onRefresh }: Mo
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // Enables the browser to send the HTTP cookie
+        credentials: "include",
         body: bodyData,
       });
 
