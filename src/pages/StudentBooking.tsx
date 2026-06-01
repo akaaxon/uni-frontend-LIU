@@ -9,8 +9,10 @@ import {
   FileText,
   X,
   ShieldAlert,
-  ChevronDown
+  ChevronDown,
+  LogOut
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const API_URL =  "http://localhost:3000";
 
@@ -44,6 +46,23 @@ export default function StudentBooking() {
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
 
   const selectedService = services.find(s => s.id === selectedServiceId) || null;
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/student/logout`, {
+        method: "POST",
+        credentials: "include"
+      });
+      
+      if (response.ok) {
+        toast.success("Logged out successfully");
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error("Logout failed");
+    }
+  };
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -69,7 +88,6 @@ export default function StudentBooking() {
       return;
     }
     
- 
     const dynamicSlots = (selectedService.available_times || []).map((timeString, index) => ({
       id: `t${index}`,
       time: timeString,
@@ -165,7 +183,16 @@ export default function StudentBooking() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative">
+        <div className="absolute top-4 right-4 z-50">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center px-4 py-2 text-sm font-medium text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors shadow-sm bg-white border border-slate-200"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            
+          </button>
+        </div>
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-10 max-w-md w-full text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="h-10 w-10 text-green-600" />
@@ -185,29 +212,30 @@ export default function StudentBooking() {
           >
             Make Another Booking
           </button>
-          <button
-            onClick={() => window.location.href = '/'}
-            className="w-full py-3 px-4 mt-3 bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700 rounded-lg font-medium"
-          >
-            Back to Dashboard
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-4 right-4 z-50">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center px-4 py-2 text-sm font-medium text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors shadow-sm bg-white border border-slate-200"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </button>
+      </div>
+
       <div className="max-w-3xl mx-auto">
-        
         <div className="text-center mb-10">
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Service Booking Portal</h1>
           <p className="mt-2 text-slate-600">Select an application type, schedule a slot, and attach required credentials.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          
-    
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center">
               <FileText className="h-5 w-5 mr-2 text-orange-600" />
@@ -251,7 +279,6 @@ export default function StudentBooking() {
             )}
           </div>
 
-       
           <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 transition-opacity ${!selectedService ? 'opacity-50 pointer-events-none' : ''}`}>
             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center">
               <Calendar className="h-5 w-5 mr-2 text-orange-600" />
@@ -304,7 +331,6 @@ export default function StudentBooking() {
             </div>
           </div>
 
-    
           <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 transition-opacity ${!selectedService ? 'opacity-50 pointer-events-none' : ''}`}>
             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center">
               <UploadCloud className="h-5 w-5 mr-2 text-orange-600" />
@@ -323,7 +349,6 @@ export default function StudentBooking() {
               <div className="space-y-6">
                 {selectedService.required_documents.map((docName, index) => {
                   const uploadedFile = files[docName];
-
                   return (
                     <div key={index} className="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
                       <div className="flex justify-between items-start mb-3">
@@ -388,7 +413,6 @@ export default function StudentBooking() {
               )}
             </button>
           </div>
-
         </form>
       </div>
     </div>

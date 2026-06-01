@@ -17,7 +17,7 @@ export default function AdminDashboard() {
 
   const fetchBookings = async () => {
     setIsLoading(true);
-    setPageError(null); // Reset error state on new attempt
+    setPageError(null); 
 
     try {
       const response = await fetch(`${API_URL}/admin/bookings`, {
@@ -35,7 +35,19 @@ export default function AdminDashboard() {
       }
 
       const data = await response.json();
-      setBookings(data.result || []);
+      
+      // FLATTEN THE SUPABASE NESTED OBJECTS HERE
+      const formattedBookings = (data.result || []).map((b: any) => ({
+        id: b.id,
+        student_name: b.students?.full_name || "Unknown",
+        student_email: b.students?.email || "Unknown",
+        service_name: b.services?.name || "Unknown",
+        appointment_time: b.appointment_time,
+        document_urls: b.document_urls,
+        status: b.status,
+      }));
+
+      setBookings(formattedBookings);
       
     } catch (error: any) {
       setPageError(error.message || "Could not connect to the database. Please check your connection.");
