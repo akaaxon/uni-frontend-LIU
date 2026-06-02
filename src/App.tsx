@@ -9,6 +9,8 @@ import StudentBooking from './pages/StudentBooking';
 
 import { AdminRoute, StudentRoute } from './components/ProtectedRoutes';
 import ChatWidget from './components/ChatWidget';
+import InfoPage from './pages/InfoPage';
+import InfoButton from './components/InfoButton';
 
 function App() {
   return (
@@ -17,6 +19,7 @@ function App() {
       
       <Routes>
         <Route path="/" element={<AuthGateway />} />
+        <Route path="/info" element={<InfoPage />} />
 
         <Route 
           path="/booking" 
@@ -40,6 +43,7 @@ function App() {
         </Route>
       </Routes>
       <ChatWidget />
+      <InfoButton />
     </BrowserRouter>
   );
 }

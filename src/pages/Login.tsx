@@ -19,7 +19,7 @@ export default function AuthGateway() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [universityId, setUniversityId] = useState("");
+
   
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -40,7 +40,7 @@ export default function AuthGateway() {
   }, [navigate]);
 
   const resetForm = () => {
-    setEmail(""); setPassword(""); setFullName(""); setUniversityId(""); setErrorMessage("");
+    setEmail(""); setPassword(""); setFullName(""); setErrorMessage("");
   };
 
   const handleRoleSelect = (selectedRole: RoleState) => {
@@ -83,7 +83,7 @@ export default function AuthGateway() {
     const endpoint = studentMode === "login" ? "/api/student/login" : "/api/student/register";
     
     if (!email || !password) return setErrorMessage("Email and password are required.");
-    if (studentMode === "register" && (!fullName || !universityId)) {
+    if (studentMode === "register" && (!fullName)) {
       return setErrorMessage("Please fill out all registration fields.");
     }
 
@@ -91,7 +91,7 @@ export default function AuthGateway() {
     try {
       const payload = studentMode === "login" 
         ? { email, password }
-        : { full_name: fullName, email, password, university_id: universityId };
+        : { full_name: fullName, email, password };
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
@@ -190,11 +190,6 @@ export default function AuthGateway() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">University ID</label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Hash className="h-5 w-5 text-slate-400" /></div>
-                    <input type="text" disabled={isLoading} className="block w-full pl-10 sm:text-sm border-slate-300 rounded-md py-2.5 border outline-none focus:ring-orange-600 focus:border-orange-600" placeholder="202600123" value={universityId} onChange={(e) => setUniversityId(e.target.value)} />
-                  </div>
                 </div>
               </>
             )}
