@@ -5,7 +5,7 @@ export default function AdminLayout() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const API_URL = "http://localhost:3000";
+    const API_URL = "https://grad-6h2k.onrender.com/";
     const handleLogout = async () => {
         try {
             const response = await fetch(`${API_URL}/api/admin/logout`, {

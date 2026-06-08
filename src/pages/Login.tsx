@@ -5,7 +5,7 @@ import {
   Loader2, Lock, Mail, AlertCircle, Shield, GraduationCap, ArrowLeft, User, Hash 
 } from "lucide-react";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://grad-6h2k.onrender.com/";
 
 type RoleState = "selection" | "admin" | "student";
 type StudentMode = "login" | "register";

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL =  "http://localhost:3000";
+const API_URL =  "https://grad-6h2k.onrender.com/";
 
 type Service = { 
   id: string; 

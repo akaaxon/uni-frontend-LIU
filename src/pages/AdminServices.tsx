@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2, AlertCircle, RefreshCw, FileText, X, Clock } from "lucide-react";
 
-const API_URL =  "http://localhost:3000";
+const API_URL =  "https://grad-6h2k.onrender.com/";
 
 type Service = {
   id: string;
