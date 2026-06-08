@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Loader2, Bot } from "lucide-react";
 
-const API_URL =  "https://grad-6h2k.onrender.com/";
+const API_URL =  "https://grad-6h2k.onrender.com:3000";
 
 type Message = {
   id: string;

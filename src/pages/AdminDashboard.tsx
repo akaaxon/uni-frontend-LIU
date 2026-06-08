@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import BookingModal, { type Booking } from "../components/BookingModal";
 
-const API_URL = "https://grad-6h2k.onrender.com/";
+const API_URL = "https://grad-6h2k.onrender.com:3000";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();

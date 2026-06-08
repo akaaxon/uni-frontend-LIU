@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const API_URL = "https://grad-6h2k.onrender.com/";
+const API_URL = "https://grad-6h2k.onrender.com:3000";
 
 export function AdminRoute({ children }: { children: JSX.Element }) {
   const [isAuth, setIsAuth] = useState<boolean | null>(null);

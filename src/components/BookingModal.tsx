@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X, Check, Ban, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const API_URL =  "https://grad-6h2k.onrender.com/";
+const API_URL =  "https://grad-6h2k.onrender.com:3000";
 
 export type Booking = {
   id: string;
