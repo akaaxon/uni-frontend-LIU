@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { 
-  Loader2, Lock, Mail, AlertCircle, Shield, GraduationCap, ArrowLeft, User, Hash 
+  Loader2, Lock, Mail, AlertCircle, Shield, GraduationCap, ArrowLeft, User 
 } from "lucide-react";
 
 const API_URL = "https://grad-6h2k.onrender.com/";
